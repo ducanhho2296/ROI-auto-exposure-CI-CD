@@ -1,0 +1,4 @@
+depthai==2.19.0.0
+fastapi==0.92.0
+opencv-python==4.5.4.60
+numpy==1.19.5
