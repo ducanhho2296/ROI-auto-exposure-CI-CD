@@ -70,56 +70,95 @@ class AutoExposureRegion:
         #move the ROI if we have cropped image
         # roi[0] += (self.resolution[0] - self.resolution[1]) // 2  # x offset for device crop 
         return roi
-
-# Connect to device and start pipeline
-with dai.Device(pipeline) as device:
-
-    # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-    qControl = device.getInputQueue(name="camControl")
-    qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
-    frame = None
-    detections = []
-
-    nnRegion = True
-    region = AutoExposureRegion()
-
-    def displayFrame(name, frame):
+    
+def displayFrame(name, frame):
         if not nnRegion:
             cv2.rectangle(frame, region.position, region.endPosition(), (0, 255, 0), 2)
         cv2.imshow(name, frame)
-    while True:
-        # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
-        inRgb = qRgb.tryGet()
 
-        if inRgb is not None:
-            frame = inRgb.getCvFrame()
 
-        if frame is not None:
-            displayFrame("rgb", frame)
+if __name__ == "__main__":
+    region = AutoExposureRegion()
 
-        key = cv2.waitKey(1)
-        if key == ord('n'):
-            print("AE ROI controlled by NN")
+    # Connect to device and start pipeline
+    try: 
+        with dai.Device(pipeline) as device:
+
+            # Output queues will be used to get the rgb frames and nn data from the outputs defined above
+            qControl = device.getInputQueue(name="camControl")
+            qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+            frame = None
+            detections = []
+
             nnRegion = True
-        elif key in [ord('w'), ord('a'), ord('s'), ord('d'), ord('+'), ord('-')]:
-            nnRegion = False
-            if key == ord('a'):
-                region.move(x=-region.step)
-            if key == ord('d'):
-                region.move(x=region.step)
-            if key == ord('w'):
-                region.move(y=-region.step)
-            if key == ord('s'):
-                region.move(y=region.step)
-            if key == ord('+'):
-                region.grow(x=10, y=10)
-                region.step = region.step + 1
-            if key == ord('-'):
-                region.grow(x=-10, y=-10)
-                region.step = max(region.step - 1, 1)
-            print(f"Setting static AE ROI: {region.toRoi()} (on frame: {[*region.position, *region.endPosition()]})")
-            qControl.send(asControl(region.toRoi()))
-        elif key == ord('q'):
-            break
+            while True:
+                # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
+                inRgb = qRgb.tryGet()
 
+                if inRgb is not None:
+                    frame = inRgb.getCvFrame()
+
+                if frame is not None:
+                    displayFrame("rgb", frame)
+
+                key = cv2.waitKey(1)
+                if key == ord('n'):
+                    print("AE ROI controlled by NN")
+                    nnRegion = True
+                elif key in [ord('w'), ord('a'), ord('s'), ord('d'), ord('+'), ord('-')]:
+                    nnRegion = False
+                    if key == ord('a'):
+                        region.move(x=-region.step)
+                    if key == ord('d'):
+                        region.move(x=region.step)
+                    if key == ord('w'):
+                        region.move(y=-region.step)
+                    if key == ord('s'):
+                        region.move(y=region.step)
+                    if key == ord('+'):
+                        region.grow(x=10, y=10)
+                        region.step = region.step + 1
+                    if key == ord('-'):
+                        region.grow(x=-10, y=-10)
+                        region.step = max(region.step - 1, 1)
+                    print(f"Setting static AE ROI: {region.toRoi()} (on frame: {[*region.position, *region.endPosition()]})")
+                    qControl.send(asControl(region.toRoi()))
+                elif key == ord('q'):
+                    break
+
+    except RuntimeError:
+        print("No available devices, using webcam")
+        cap = cv2.VideoCapture(0)
+        nnRegion = True
+        while True:
+            # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
+            ret, frame = cap.read() 
+
+            if ret:
+                displayFrame("rgb", frame)
+            key = cv2.waitKey(1)
+            if key == ord('n'):
+                print("AE ROI controlled by NN")
+                nnRegion = True
+            elif key in [ord('w'), ord('a'), ord('s'), ord('d'), ord('+'), ord('-')]:
+                nnRegion = False
+                if key == ord('a'):
+                    region.move(x=-region.step)
+                if key == ord('d'):
+                    region.move(x=region.step)
+                if key == ord('w'):
+                    region.move(y=-region.step)
+                if key == ord('s'):
+                    region.move(y=region.step)
+                if key == ord('+'):
+                    region.grow(x=10, y=10)
+                    region.step = region.step + 1
+                if key == ord('-'):
+                    region.grow(x=-10, y=-10)
+                    region.step = max(region.step - 1, 1)
+                print(f"Setting static AE ROI: {region.toRoi()} (on frame: {[*region.position, *region.endPosition()]})")
+            elif key == ord('q'):
+                break
+        cap.release()
+        cv2.destroyAllWindows()
 
