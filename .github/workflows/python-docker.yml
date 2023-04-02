@@ -1,0 +1,29 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: vip3d2296/demo:latest
+          dockerfile: Dockerfile
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Test
+        run: |
+          docker run --rm vip3d2296/demo:latest pytest
+      - name: Deploy
+        run: |
+          docker pull vip3d2296/demo:latest
+          docker run -d -p 8080:80 vip3d2296/demo:latest
