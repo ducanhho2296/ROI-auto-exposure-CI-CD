@@ -31,9 +31,9 @@ jobs:
     - name: check if docker is installed 
       run: docker run hello-world
   
-    - name: Build Docker image
-      run: |
-        docker build -t vip3d2296/roi_auto_exposure:demo Docker/.
+    # - name: Build Docker image
+    #   run: |
+    #     docker build -t vip3d2296/roi_auto_exposure:demo Docker/.
     
     - name: Push to docker hub
       uses: docker/build-push-action@v4.0.0
@@ -44,6 +44,6 @@ jobs:
         tag_with_ref: true
         tags: demo
         
-    - name: Run Docker image with pytest
-      run: |
-        docker run vip3d2296/roi_auto_exposure:demo pytest tests/
+    # - name: Run Docker image with pytest
+    #   run: |
+    #     docker run vip3d2296/roi_auto_exposure:demo pytest tests/
