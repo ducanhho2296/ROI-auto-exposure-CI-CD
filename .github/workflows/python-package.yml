@@ -42,7 +42,6 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: docker push vip3d2296/roi_auto_exposure
         tag_with_ref: true
-        tags: demo
         
     # - name: Run Docker image with pytest
     #   run: |
