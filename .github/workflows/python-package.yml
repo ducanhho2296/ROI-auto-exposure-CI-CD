@@ -34,9 +34,7 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t vip3d2296/roi_auto_exposure:demo-$(date +%s) Docker/.
-    - name: Run Docker image with pytest
-      run: |
-        docker run vip3d2296/roi_auto_exposure:demo-$(date +%s) pytest tests/
+    
     - name: Push to docker hub
       uses: docker/build-push-action@v4.0.0
       with: 
@@ -45,3 +43,7 @@ jobs:
         repository: vip3d2296/roi_auto_exposure
         tag_with_ref: true
         tags: demo-$(date +%s)
+        
+    - name: Run Docker image with pytest
+      run: |
+        docker run vip3d2296/roi_auto_exposure:demo-$(date +%s) pytest tests/
