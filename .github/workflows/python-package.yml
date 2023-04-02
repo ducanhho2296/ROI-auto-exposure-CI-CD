@@ -35,14 +35,17 @@ jobs:
     #   run: |
     #     docker build -t vip3d2296/roi_auto_exposure:demo Docker/.
     
-    - name: Push to docker hub
+    - name: Build and push Docker image
       uses: docker/build-push-action@v4.0.0
-      with: 
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: docker push vip3d2296/roi_auto_exposure
-        tag_with_ref: true
-        dockerfile: ./ROI-auto-exposure-CI-CD/Docker/Dockerfile
+      with:
+        context: .
+        file: ./ROI-auto-exposure-CI-CD/Docker/Dockerfile
+        push: true
+        tags: vip3d2296/roi_auto_exposure:latest
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
     # - name: Run Docker image with pytest
     #   run: |
     #     docker run vip3d2296/roi_auto_exposure:demo pytest tests/
