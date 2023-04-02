@@ -33,7 +33,7 @@ jobs:
   
     - name: Build Docker image
       run: |
-        docker build -t vip3d2296/roi_auto_exposure:demo-$(date +%s) Docker/.
+        docker build -t vip3d2296/roi_auto_exposure:demo-$(date +%s) Docker/Dockerfile ../
     - name: Run Docker image with pytest
       run: |
         docker run vip3d2296/roi_auto_exposure:demo-$(date +%s) pytest tests/
